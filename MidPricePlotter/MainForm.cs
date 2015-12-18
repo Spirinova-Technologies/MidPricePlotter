@@ -6,27 +6,73 @@ using System.Linq;
 // ...
 
 namespace MidPricePlotter {
+
+
     public partial class MainForm : Form {
+
+        private double _minRangeValue = 30;
+        private double _maxRangeValue = 90;
+
+        private const int XScaleMultiplier = 120000;
 
         private Dictionary<string, Series> SignalSeriesMap;
         private SignalDataService _signalDataService = new SignalDataService();
         private DateTime _startTime;
+
+        private int TimeIntervalInMilliSeconds
+        {
+            get
+            {
+                //MessageBox.Show(comboBoxTime.SelectedValue.ToString());
+                return Convert.ToInt32(comboBoxTime.SelectedValue);
+            }
+            set
+            {
+            }
+        }
+
+        private void PopulateIntervalComboBox()
+        {
+            var dict = new Dictionary<string, int>();
+
+            dict.Add("1 SEC", GetInterval(1));
+            dict.Add("1 MIN", GetInterval(60));
+            dict.Add("2 MINS", GetInterval(120));
+            dict.Add("3 MINS", GetInterval(180));
+            dict.Add("5 MINS", GetInterval(300));
+            dict.Add("15 MINS", GetInterval(900));
+            dict.Add("30 MINS", GetInterval(1800));
+
+            comboBoxTime.DataSource = new BindingSource(dict, null);
+            comboBoxTime.DisplayMember = "Key";
+            comboBoxTime.ValueMember = "Value";
+
+            comboBoxTime.SelectedIndex = 0;
+        }
+
+
+        private int GetInterval(int seconds)
+        {
+            return XScaleMultiplier * seconds;
+        }
         public MainForm() {
             InitializeComponent();
-
-
+            PopulateIntervalComboBox();
+            
             SignalSeriesMap = new Dictionary<string, Series>();
 
             chartControl1.Legend.AlignmentHorizontal = LegendAlignmentHorizontal.Center;
             chartControl1.Legend.AlignmentVertical = LegendAlignmentVertical.TopOutside;
             chartControl1.Legend.Direction = LegendDirection.LeftToRight;
 
-            timer1.Interval = (int)numericUpDownTimer.Value;
+            timer1.Interval = 1000;
+            textBoxMin.Text = _minRangeValue.ToString();
+            textBoxMax.Text = _maxRangeValue.ToString();
 
             _signalDataService.AsyncQueryGo();
             _startTime = _signalDataService.StartTime;
             _startXRange = _startTime;
-            _endXRange = _startTime.AddMilliseconds((int)numericUpDownInterval.Value);
+            _endXRange = _startTime.AddMilliseconds(90000);
                 
 
             chartControl1.Series.RemoveAt(0);
@@ -37,17 +83,16 @@ namespace MidPricePlotter {
                 diagram.AxisX.DateTimeScaleOptions.MeasureUnit = DateTimeMeasureUnit.Second;
             }
 
+            if (AxisYWholeRange != null)
+            {
+                AxisYWholeRange.SetMinMaxValues(_minRangeValue, _maxRangeValue);
+
+            }
             //chartControl1.Series.Add(NewSeries("ASDASD"));
         }
 
-        private double _minRangeValue = 30;
-        private double _maxRangeValue = 90;
-
-
-        const int interval = 1;
-        Random random = new Random();
-        //int TimeInterval = 10;
-        double value1 = 10.0;
+      
+        
 
         Range AxisXRange {
             get {
@@ -58,7 +103,7 @@ namespace MidPricePlotter {
             }
         }
 
-        Range AxisYRange
+        Range AxisYVisualRange
         {
             get
             {
@@ -69,13 +114,18 @@ namespace MidPricePlotter {
             }
         }
 
-        double CalculateNextValue(double value) {
-            return value + (random.NextDouble() * 10.0 - 5.0);
+        Range AxisYWholeRange
+        {
+            get
+            {
+                SwiftPlotDiagram diagram = chartControl1.Diagram as SwiftPlotDiagram;
+                if (diagram != null)
+                    return diagram.AxisY.WholeRange;
+                return null;
+            }
         }
 
-        void UpdateValues() {
-            value1 = CalculateNextValue(value1);
-        }
+      
 
 
         void InsertOrUpdateSeries(SignalData signalData, DateTime startDate, DateTime endDate)
@@ -293,8 +343,8 @@ namespace MidPricePlotter {
                         if (_endTime > _endXRange)
                         {
                            // _startXRange = _endXRange;
-                           
-                            _endXRange = _endXRange.AddMilliseconds((int)numericUpDownInterval.Value);
+
+                            _endXRange = _endXRange.AddMilliseconds(TimeIntervalInMilliSeconds);
                             //AxisXRange.SetMinMaxValues(_startXRange, _endXRange);
                             AxisXRange.SetMinMaxValues(_startXRange, _endXRange);
                         }
@@ -370,45 +420,56 @@ namespace MidPricePlotter {
                     //{
                     //    AxisXRange.SetMinMaxValues(minDate, argument);
                     //}
-                    if (AxisYRange != null)
-                    {
-                        AxisYRange.SetMinMaxValues(_minRangeValue, _maxRangeValue);
-                        
-                    }
+                   
 
 
                
             }
         }
-
-        private void numericUpDownTimer_ValueChanged(object sender, EventArgs e)
-        {
-            this.timer1.Interval = (int)numericUpDownTimer.Value;
-        }
-
-        private void numericUpDownInterval_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
      
-        private void buttonPlay_Click(object sender, EventArgs e)
-        {
-            globalPause = false;
-        }
-
-        private void buttonPause_Click(object sender, EventArgs e)
-        {
-            globalPause = true;
-        }
-
+      
         private void buttonApply_Click(object sender, EventArgs e)
         {
-            _minRangeValue = Convert.ToInt32(textBoxMin.Text);
-            _maxRangeValue = Convert.ToInt32(textBoxMax.Text);
+            try
+            {
+                _minRangeValue = Convert.ToDouble(textBoxMin.Text);
+                _maxRangeValue = Convert.ToDouble(textBoxMax.Text);
+
+                if (AxisYWholeRange != null)
+                {
+                    AxisYWholeRange.SetMinMaxValues(_minRangeValue, _maxRangeValue);
+
+                }
+            }
+            catch(Exception)
+            {
+                MessageBox.Show("Please enter a valid number." , "MidPricePlotter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-     
+
+        private void checkBoxPlayPause_CheckedChanged(object sender, EventArgs e)
+        {
+            if( checkBoxPlayPause.Checked == false)
+            {
+                //MessageBox.Show("False");
+                globalPause = false;
+                checkBoxPlayPause.Text = "Pause";
+            }
+            else
+            {
+                //MessageBox.Show("tru");
+                globalPause = true;
+                checkBoxPlayPause.Text = "Play";
+            }
+        }
+
+        private void listBoxRanges_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var nums = listBoxRanges.Items[listBoxRanges.SelectedIndex].ToString().Split('-');
+            textBoxMin.Text = nums[0].Trim();
+            textBoxMax.Text = nums[1].Trim();
+        }
 
     }
 }

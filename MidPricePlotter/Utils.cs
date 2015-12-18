@@ -27,5 +27,7 @@ namespace MidPricePlotter
                 return DateTime.MinValue;
             }
         }
+
+       
     }
 }
