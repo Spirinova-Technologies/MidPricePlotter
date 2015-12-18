@@ -10,8 +10,8 @@ namespace MidPricePlotter {
 
     public partial class MainForm : Form {
 
-        private double _minRangeValue = 30;
-        private double _maxRangeValue = 90;
+        private double _minYRangeValue = 30;
+        private double _maxYRangeValue = 90;
 
         private const int XScaleMultiplier = 120000;
 
@@ -19,7 +19,7 @@ namespace MidPricePlotter {
         private SignalDataService _signalDataService = new SignalDataService();
         private DateTime _startTime;
 
-        private int TimeIntervalInMilliSeconds
+        private int FullXRangeInMilliSeconds
         {
             get
             {
@@ -66,13 +66,13 @@ namespace MidPricePlotter {
             chartControl1.Legend.Direction = LegendDirection.LeftToRight;
 
             timer1.Interval = 1000;
-            textBoxMin.Text = _minRangeValue.ToString();
-            textBoxMax.Text = _maxRangeValue.ToString();
+            textBoxMin.Text = _minYRangeValue.ToString();
+            textBoxMax.Text = _maxYRangeValue.ToString();
 
             _signalDataService.AsyncQueryGo();
             _startTime = _signalDataService.StartTime;
-            _startXRange = _startTime;
-            _endXRange = _startTime.AddMilliseconds(90000);
+
+            SetXRangeValuesFromStart(_startTime);
                 
 
             chartControl1.Series.RemoveAt(0);
@@ -85,7 +85,7 @@ namespace MidPricePlotter {
 
             if (AxisYWholeRange != null)
             {
-                AxisYWholeRange.SetMinMaxValues(_minRangeValue, _maxRangeValue);
+                AxisYWholeRange.SetMinMaxValues(_minYRangeValue, _maxYRangeValue);
 
             }
             //chartControl1.Series.Add(NewSeries("ASDASD"));
@@ -94,11 +94,22 @@ namespace MidPricePlotter {
       
         
 
-        Range AxisXRange {
+        Range AxisXVisualRange {
             get {
                 SwiftPlotDiagram diagram = chartControl1.Diagram as SwiftPlotDiagram;
                 if (diagram != null)
                     return diagram.AxisX.VisualRange;
+                return null;
+            }
+        }
+
+        Range AxisXWholeRange
+        {
+            get
+            {
+                SwiftPlotDiagram diagram = chartControl1.Diagram as SwiftPlotDiagram;
+                if (diagram != null)
+                    return diagram.AxisX.WholeRange;
                 return null;
             }
         }
@@ -126,6 +137,17 @@ namespace MidPricePlotter {
         }
 
       
+        private void SetXRangeValuesFromStart(DateTime startTime)
+        {
+            _startXRange = startTime;
+            _endXRange = _startXRange.AddMilliseconds(FullXRangeInMilliSeconds);
+        }
+
+        private void SetXRangeValuesFromEnd(DateTime endTime)
+        {
+            _endXRange = endTime;
+            _startXRange = endTime.AddMilliseconds(-1 * FullXRangeInMilliSeconds);
+        }
 
 
         void InsertOrUpdateSeries(SignalData signalData, DateTime startDate, DateTime endDate)
@@ -319,14 +341,7 @@ namespace MidPricePlotter {
         bool globalPause = false;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //Series series1 = chartControl1.Series[0];
-
-            //if (series1 == null)
-            //    return;
             DateTime argument = _startTime;
-           // _endTime = _startTime.AddMilliseconds((int)numericUpDownInterval.Value);
-
-          
             bool pause;
             var signalData = _signalDataService.GetSignalData( _startTime, ref _endTime, out pause);
            
@@ -338,106 +353,61 @@ namespace MidPricePlotter {
                     
                     InsertOrUpdateSeries(signalData, _startTime, _endTime);
 
-                   if (AxisXRange != null)
+                   if (AxisXVisualRange != null)
                     {
                         if (_endTime > _endXRange)
                         {
-                           // _startXRange = _endXRange;
-
-                            _endXRange = _endXRange.AddMilliseconds(TimeIntervalInMilliSeconds);
-                            //AxisXRange.SetMinMaxValues(_startXRange, _endXRange);
-                            AxisXRange.SetMinMaxValues(_startXRange, _endXRange);
+                            SetXRangeValuesFromEnd(_endTime);
+                            //AxisXVisualRange.SetMinMaxValues(_startXRange, _endXRange);
+                            AxisXWholeRange.SetMinMaxValues(_startXRange, _endXRange);
                         }
                     }
                     _startTime = _endTime;
                 }
-                else
-                {
-                    //SeriesPoint[] pointsToUpdate1 = new SeriesPoint[interval];
-                    //for (int i = 0; i < interval; i++)
-                    //{
-                    //        pointsToUpdate1[i] = new SeriesPoint(argument, value1);
-                    //        argument = argument.AddMilliseconds(1);
-                    //        UpdateValues();
-                    //}
-                }
-                    //SeriesPoint[] pointsToUpdate1 = new SeriesPoint[interval];
-                    //for (int i = 0; i < interval; i++)
-                    //{
 
-                    //    //if (i % 2 == 0)
-                    //    {
-                    //        pointsToUpdate1[i] = new SeriesPoint(argument, value1);
-                    //        argument = argument.AddMilliseconds(1);
-                    //        UpdateValues();//
-                    //    }
-                    //}
-                   // DateTime minDate = argument.AddSeconds(-TimeInterval);
-                   
-                    //foreach (Series series1 in chartControl1.Series)
-                    //{
-                    //    int pointsToRemoveCount = 0;
-                    //    foreach (SeriesPoint point in series1.Points)
-                    //        if (point.DateTimeArgument < minDate)
-                    //            pointsToRemoveCount++;
-                    //    if (pointsToRemoveCount < series1.Points.Count)
-                    //        pointsToRemoveCount--;
-                      
-                    //    if (pointsToRemoveCount > 0)
-                    //    {
-                    //        //series1.Points.RemoveRange(0, pointsToRemoveCount);
-                    //    }
-                    //}
-
-                   
-                    foreach (Series series1 in chartControl1.Series)
-                    {
-                        int  pointsToRemoveCount = 0;
-                        //var lastPoint = series1.Points[series1.Points.Count - 1];
-                        foreach (SeriesPoint point in series1.Points)
-                        {
-                            if (series1.Points.Count > 1)
-                            {
-                                if (point.DateTimeArgument < (DateTime)AxisXRange.MinValue)
-                                {
-                                    pointsToRemoveCount++;
-                                   // series1.Points.Remove(point);
-                                }
-
-                                if (pointsToRemoveCount < series1.Points.Count)
-                                    pointsToRemoveCount--;
-
-                                if (pointsToRemoveCount > 0)
-                                {
-                                    //series1.Points.RemoveRange(0, pointsToRemoveCount);
-                                }
-                            }
-                        }
-                    }
-               
-
-                    //if (AxisXRange != null)
-                    //{
-                    //    AxisXRange.SetMinMaxValues(minDate, argument);
-                    //}
-                   
-
-
-               
+                //RemoveOldChartPoints();
             }
         }
      
+     
+
+        private void RemoveOldChartPoints()
+        {
+            foreach (Series series1 in chartControl1.Series)
+            {
+                int pointsToRemoveCount = 0;
+                //var lastPoint = series1.Points[series1.Points.Count - 1];
+                foreach (SeriesPoint point in series1.Points)
+                {
+                    if (series1.Points.Count > 1)
+                    {
+                        if (point.DateTimeArgument < (DateTime)AxisXVisualRange.MinValue)
+                        {
+                            pointsToRemoveCount++;
+                        }
+
+                        if (pointsToRemoveCount < series1.Points.Count)
+                            pointsToRemoveCount--;
+
+                        if (pointsToRemoveCount > 0)
+                        {
+                            series1.Points.RemoveRange(0, pointsToRemoveCount);
+                        }
+                    }
+                }
+            }
+        }
       
         private void buttonApply_Click(object sender, EventArgs e)
         {
             try
             {
-                _minRangeValue = Convert.ToDouble(textBoxMin.Text);
-                _maxRangeValue = Convert.ToDouble(textBoxMax.Text);
+                _minYRangeValue = Convert.ToDouble(textBoxMin.Text);
+                _maxYRangeValue = Convert.ToDouble(textBoxMax.Text);
 
                 if (AxisYWholeRange != null)
                 {
-                    AxisYWholeRange.SetMinMaxValues(_minRangeValue, _maxRangeValue);
+                    AxisYWholeRange.SetMinMaxValues(_minYRangeValue, _maxYRangeValue);
 
                 }
             }

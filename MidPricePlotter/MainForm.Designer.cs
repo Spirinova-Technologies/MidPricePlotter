@@ -25,11 +25,11 @@ namespace MidPricePlotter {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            DevExpress.XtraCharts.SwiftPlotDiagram swiftPlotDiagram2 = new DevExpress.XtraCharts.SwiftPlotDiagram();
-            DevExpress.XtraCharts.Series series2 = new DevExpress.XtraCharts.Series();
-            DevExpress.XtraCharts.SwiftPlotSeriesView swiftPlotSeriesView2 = new DevExpress.XtraCharts.SwiftPlotSeriesView();
-            DevExpress.XtraCharts.SideBySideBarSeriesLabel sideBySideBarSeriesLabel2 = new DevExpress.XtraCharts.SideBySideBarSeriesLabel();
-            DevExpress.XtraCharts.ChartTitle chartTitle2 = new DevExpress.XtraCharts.ChartTitle();
+            DevExpress.XtraCharts.SwiftPlotDiagram swiftPlotDiagram1 = new DevExpress.XtraCharts.SwiftPlotDiagram();
+            DevExpress.XtraCharts.Series series1 = new DevExpress.XtraCharts.Series();
+            DevExpress.XtraCharts.SwiftPlotSeriesView swiftPlotSeriesView1 = new DevExpress.XtraCharts.SwiftPlotSeriesView();
+            DevExpress.XtraCharts.SideBySideBarSeriesLabel sideBySideBarSeriesLabel1 = new DevExpress.XtraCharts.SideBySideBarSeriesLabel();
+            DevExpress.XtraCharts.ChartTitle chartTitle1 = new DevExpress.XtraCharts.ChartTitle();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.chartControl1 = new DevExpress.XtraCharts.ChartControl();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -37,15 +37,15 @@ namespace MidPricePlotter {
             this.checkBoxPlayPause = new System.Windows.Forms.CheckBox();
             this.comboBoxTime = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.listBoxRanges = new System.Windows.Forms.ListBox();
             this.textBoxMin = new System.Windows.Forms.TextBox();
             this.buttonApply = new System.Windows.Forms.Button();
             this.textBoxMax = new System.Windows.Forms.TextBox();
-            this.listBoxRanges = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.chartControl1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(swiftPlotDiagram2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(series2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(swiftPlotSeriesView2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(sideBySideBarSeriesLabel2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(swiftPlotDiagram1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(series1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(swiftPlotSeriesView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(sideBySideBarSeriesLabel1)).BeginInit();
             this.panel1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -61,29 +61,29 @@ namespace MidPricePlotter {
             this.chartControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            swiftPlotDiagram2.AxisX.Label.TextPattern = "{A:hh:mm:ss}";
-            swiftPlotDiagram2.AxisX.VisibleInPanesSerializable = "-1";
-            swiftPlotDiagram2.AxisY.VisibleInPanesSerializable = "-1";
-            swiftPlotDiagram2.Margins.Left = 40;
-            swiftPlotDiagram2.Margins.Right = 30;
-            this.chartControl1.Diagram = swiftPlotDiagram2;
+            swiftPlotDiagram1.AxisX.Label.TextPattern = "{A:hh:mm:ss}";
+            swiftPlotDiagram1.AxisX.VisibleInPanesSerializable = "-1";
+            swiftPlotDiagram1.AxisY.VisibleInPanesSerializable = "-1";
+            swiftPlotDiagram1.Margins.Left = 40;
+            swiftPlotDiagram1.Margins.Right = 30;
+            this.chartControl1.Diagram = swiftPlotDiagram1;
             this.chartControl1.Legend.Visibility = DevExpress.Utils.DefaultBoolean.True;
             this.chartControl1.Location = new System.Drawing.Point(231, 1);
             this.chartControl1.Name = "chartControl1";
-            series2.ArgumentScaleType = DevExpress.XtraCharts.ScaleType.DateTime;
-            series2.LegendText = "Swift Plot Series";
-            series2.Name = "series1";
-            swiftPlotSeriesView2.Antialiasing = true;
-            series2.View = swiftPlotSeriesView2;
+            series1.ArgumentScaleType = DevExpress.XtraCharts.ScaleType.DateTime;
+            series1.LegendText = "Swift Plot Series";
+            series1.Name = "series1";
+            swiftPlotSeriesView1.Antialiasing = true;
+            series1.View = swiftPlotSeriesView1;
             this.chartControl1.SeriesSerializable = new DevExpress.XtraCharts.Series[] {
-        series2};
-            sideBySideBarSeriesLabel2.LineVisibility = DevExpress.Utils.DefaultBoolean.True;
-            this.chartControl1.SeriesTemplate.Label = sideBySideBarSeriesLabel2;
-            this.chartControl1.Size = new System.Drawing.Size(560, 483);
+        series1};
+            sideBySideBarSeriesLabel1.LineVisibility = DevExpress.Utils.DefaultBoolean.True;
+            this.chartControl1.SeriesTemplate.Label = sideBySideBarSeriesLabel1;
+            this.chartControl1.Size = new System.Drawing.Size(653, 646);
             this.chartControl1.TabIndex = 0;
-            chartTitle2.Text = "Midpoint Plotter";
+            chartTitle1.Text = "Midpoint Plotter";
             this.chartControl1.Titles.AddRange(new DevExpress.XtraCharts.ChartTitle[] {
-            chartTitle2});
+            chartTitle1});
             // 
             // panel1
             // 
@@ -93,7 +93,7 @@ namespace MidPricePlotter {
             this.panel1.Controls.Add(this.groupBox1);
             this.panel1.Location = new System.Drawing.Point(2, 1);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(234, 483);
+            this.panel1.Size = new System.Drawing.Size(234, 646);
             this.panel1.TabIndex = 1;
             // 
             // groupBox2
@@ -143,6 +143,20 @@ namespace MidPricePlotter {
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Range";
             // 
+            // listBoxRanges
+            // 
+            this.listBoxRanges.FormattingEnabled = true;
+            this.listBoxRanges.Items.AddRange(new object[] {
+            "0 - 50",
+            "50 - 100",
+            "100 - 150",
+            "2000 - 2100"});
+            this.listBoxRanges.Location = new System.Drawing.Point(19, 19);
+            this.listBoxRanges.Name = "listBoxRanges";
+            this.listBoxRanges.Size = new System.Drawing.Size(150, 134);
+            this.listBoxRanges.TabIndex = 15;
+            this.listBoxRanges.SelectedIndexChanged += new System.EventHandler(this.listBoxRanges_SelectedIndexChanged);
+            // 
             // textBoxMin
             // 
             this.textBoxMin.Location = new System.Drawing.Point(19, 176);
@@ -169,33 +183,19 @@ namespace MidPricePlotter {
             this.textBoxMax.TabIndex = 3;
             this.textBoxMax.Text = "2200";
             // 
-            // listBoxRanges
-            // 
-            this.listBoxRanges.FormattingEnabled = true;
-            this.listBoxRanges.Items.AddRange(new object[] {
-            "0 - 50",
-            "50 - 100",
-            "100 - 150",
-            "2000 - 2100"});
-            this.listBoxRanges.Location = new System.Drawing.Point(19, 19);
-            this.listBoxRanges.Name = "listBoxRanges";
-            this.listBoxRanges.Size = new System.Drawing.Size(150, 134);
-            this.listBoxRanges.TabIndex = 15;
-            this.listBoxRanges.SelectedIndexChanged += new System.EventHandler(this.listBoxRanges_SelectedIndexChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(789, 485);
+            this.ClientSize = new System.Drawing.Size(882, 648);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.chartControl1);
             this.Name = "MainForm";
             this.Text = "Midpoint Plotter";
-            ((System.ComponentModel.ISupportInitialize)(swiftPlotDiagram2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(swiftPlotSeriesView2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(series2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(sideBySideBarSeriesLabel2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(swiftPlotDiagram1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(swiftPlotSeriesView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(series1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(sideBySideBarSeriesLabel1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartControl1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
