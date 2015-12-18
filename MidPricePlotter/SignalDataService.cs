@@ -8,6 +8,7 @@ using System.IO;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MidPricePlotter
 {
@@ -17,9 +18,15 @@ namespace MidPricePlotter
 
         private int _dbPollTime = 1000;
 
-        private DateTime _lastReadTime = DateTime.MinValue; 
+        private DateTime _lastReadTime = DateTime.MinValue;
+        private StatusStrip _uiStatusStrip;
         //private int _interval = 5000;
         //private System.Windows.Forms.Timer timer1;
+
+        public SignalDataService(StatusStrip strip)
+        {
+            _uiStatusStrip = strip;
+        }
         private DataSet RunStoredProcedureAndGetDataSet(string storedProcName, List<SqlParameter> parameters)
         {
             using (SqlConnection connection = new SqlConnection(DatabaseConnectionString))
@@ -43,7 +50,7 @@ namespace MidPricePlotter
                 return ds;
             }
         }
-
+          
         private DateTime _startTime = DateTime.MinValue;
         public DateTime StartTime
         {
@@ -51,12 +58,19 @@ namespace MidPricePlotter
             {
                 if (_startTime == DateTime.MinValue)
                 {
-                    var data = RunStoredProcedureAndGetDataSet("getMidPointGraph", null);
+                    /*var data = RunStoredProcedureAndGetDataSet("getMidPointGraph", null);
                     if (data == null || data.Tables[0].Rows.Count == 0)
                     {
                         throw new Exception("No data");
                     }
-                    _startTime = Utils.GetExactDateTime(data.Tables[0].AsEnumerable().Min(x => x[SignalData.Time]).ToString());
+                    _startTime = Utils.GetExactDateTime(data.Tables[0].AsEnumerable().Min(x => x[SignalData.Time]).ToString());                     
+                     */
+
+                    lock (DBTableLock)
+                    {
+                        if( DBTable != null && DBTable.Rows.Count > 0)
+                            _startTime = Utils.GetExactDateTime(DBTable.Rows[DBTable.Rows.Count - 1][SignalData.Time].ToString());
+                    }
                 }
                 return _startTime;
             }
@@ -82,17 +96,38 @@ namespace MidPricePlotter
         private object LastAsyncTimeLock = new object();
         public void StoreSignalDataTask()
         {
+            bool connected = false;
+
             while (true)
             {
-                StoreSignalData();
-                Thread.Sleep(_dbPollTime);
+                try
+                {
+                    StoreSignalData();
+                    if (connected == false)
+                    {
+                        _uiStatusStrip.BeginInvoke((Action)delegate()
+                        {
+                            _uiStatusStrip.Items[0].Text = "Connected";
+                        });
+                        connected = true;
+                    }
+                    Thread.Sleep(_dbPollTime);
+                }
+                catch (Exception)
+                {
+                    _uiStatusStrip.BeginInvoke((Action)delegate()
+                    {
+                        _uiStatusStrip.Items[0].Text = "Connection failed. Reconnecting...";
+                    });
+                    connected = false;
+                }
             }
         }
 
        public void StoreSignalData()
         {
             var data = RunStoredProcedureAndGetDataSet("getMidPointGraph", null);
-            if (data.Tables.Count != 0)
+            if (data != null && data.Tables.Count != 0)
             {
                 lock (DBTableLock)
                 {

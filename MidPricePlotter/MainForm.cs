@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using DevExpress.XtraCharts;
 using System.Collections.Generic;
 using System.Linq;
+
 // ...
 
 namespace MidPricePlotter {
@@ -10,14 +11,15 @@ namespace MidPricePlotter {
 
     public partial class MainForm : Form {
 
-        private double _minYRangeValue = 30;
-        private double _maxYRangeValue = 90;
+        private double _minYRangeValue = 0;
+        private double _maxYRangeValue = 0;
 
         private const int XScaleMultiplier = 120000;
 
         private Dictionary<string, Series> SignalSeriesMap;
-        private SignalDataService _signalDataService = new SignalDataService();
+        private SignalDataService _signalDataService;
         private DateTime _startTime;
+        private DateTime _appStartTime;
 
         private int FullXRangeInMilliSeconds
         {
@@ -57,7 +59,11 @@ namespace MidPricePlotter {
         }
         public MainForm() {
             InitializeComponent();
+
+            _signalDataService = new SignalDataService(statusStrip1);
             PopulateIntervalComboBox();
+            comboBoxTime.SelectedIndexChanged += new System.EventHandler(this.comboBoxTime_SelectedIndexChanged);
+
             
             SignalSeriesMap = new Dictionary<string, Series>();
 
@@ -66,11 +72,11 @@ namespace MidPricePlotter {
             chartControl1.Legend.Direction = LegendDirection.LeftToRight;
 
             timer1.Interval = 1000;
-            textBoxMin.Text = _minYRangeValue.ToString();
-            textBoxMax.Text = _maxYRangeValue.ToString();
+           
 
             _signalDataService.AsyncQueryGo();
             _startTime = _signalDataService.StartTime;
+            _appStartTime = _startTime;
 
             SetXRangeValuesFromStart(_startTime);
                 
@@ -147,6 +153,10 @@ namespace MidPricePlotter {
         {
             _endXRange = endTime;
             _startXRange = endTime.AddMilliseconds(-1 * FullXRangeInMilliSeconds);
+            if( _startXRange < _appStartTime )
+            {
+                SetXRangeValuesFromStart(_appStartTime);
+            }
         }
 
 
@@ -341,6 +351,13 @@ namespace MidPricePlotter {
         bool globalPause = false;
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (_appStartTime == DateTime.MinValue)
+            {
+                _appStartTime = _startTime = _signalDataService.StartTime;
+                return;
+            }
+
+
             DateTime argument = _startTime;
             bool pause;
             var signalData = _signalDataService.GetSignalData( _startTime, ref _endTime, out pause);
@@ -405,6 +422,9 @@ namespace MidPricePlotter {
                 _minYRangeValue = Convert.ToDouble(textBoxMin.Text);
                 _maxYRangeValue = Convert.ToDouble(textBoxMax.Text);
 
+                if (_minYRangeValue >= _maxYRangeValue)
+                    throw new Exception("Max should be greater than Min");
+
                 if (AxisYWholeRange != null)
                 {
                     AxisYWholeRange.SetMinMaxValues(_minYRangeValue, _maxYRangeValue);
@@ -413,7 +433,7 @@ namespace MidPricePlotter {
             }
             catch(Exception)
             {
-                MessageBox.Show("Please enter a valid number." , "MidPricePlotter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid range." , "MidPricePlotter", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -439,6 +459,15 @@ namespace MidPricePlotter {
             var nums = listBoxRanges.Items[listBoxRanges.SelectedIndex].ToString().Split('-');
             textBoxMin.Text = nums[0].Trim();
             textBoxMax.Text = nums[1].Trim();
+        }
+
+        private void comboBoxTime_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (AxisXVisualRange != null)
+            {
+                SetXRangeValuesFromEnd(_endTime);
+                AxisXWholeRange.SetMinMaxValues(_startXRange, _endXRange);
+            }
         }
 
     }
